@@ -4,7 +4,7 @@ import { renderDispatchCard } from '../../../lib/og';
 
 export const getStaticPaths = (async () => {
   const dispatches = await getDispatches();
-  return dispatches.map(({ post, issue }) => ({ params: { id: post.id }, props: { post, issue } }));
+  return dispatches.map(({ post, issue, slug }) => ({ params: { slug }, props: { post, issue } }));
 }) satisfies GetStaticPaths;
 
 export const GET: APIRoute = async ({ props }) => {

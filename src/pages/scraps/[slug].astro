@@ -3,19 +3,26 @@ import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Nav from '../../components/Nav.astro';
 import site from '../../data/site.json';
-import { getScraps, scrapFor, issueNo, fmtDate, titleFor, excerpt } from '../../lib/board';
+import { getScraps, scrapFor, issueNo, fmtDate, titleFor, excerpt, hrefFor } from '../../lib/board';
 import { postSchema } from '../../lib/seo';
 
 export async function getStaticPaths() {
   const scraps = await getScraps();
-  return scraps.map((entry, i) => ({
-    params: { id: entry.post.id },
-    props: { entry, prev: scraps[i - 1], next: scraps[i + 1] },
-  }));
+  return [
+    ...scraps.map((entry, i) => ({
+      params: { slug: entry.slug },
+      props: { entry, prev: scraps[i - 1], next: scraps[i + 1] },
+    })),
+    // The old filename-based address forwards to the readable one.
+    ...scraps
+      .filter((e) => e.post.id !== e.slug)
+      .map((e) => ({ params: { slug: e.post.id }, props: { forward: hrefFor(e) } })),
+  ];
 }
 
-const { entry, prev, next } = Astro.props;
-const { post, issue } = entry;
+if (Astro.props.forward) return Astro.redirect(Astro.props.forward, 301);
+const { entry, prev, next } = Astro.props as Required<typeof Astro.props>;
+const { post, issue, slug } = entry;
 const { title, date, tags } = post.data;
 const { Content } = await render(post);
 const look = scrapFor(post);
@@ -24,11 +31,11 @@ const name = titleFor(entry);
 <Base
   title={title ?? `Scrap ${issueNo(issue)}`}
   description={excerpt(post.body, 160)}
-  image={`/og/scraps/${post.id}.jpg`}
+  image={`/og/scraps/${slug}.jpg`}
   imageAlt={`${name}: a scrap pinned to the ${site.title} board`}
   article={{ published: date, section: 'Scraps', tags }}
   schema={postSchema(entry)}
-  markdown={`/scraps/${post.id}.md`}
+  markdown={`/scraps/${slug}.md`}
 >
   <main class="board board-single board-scrap">
     <Nav />
@@ -54,8 +61,8 @@ const name = titleFor(entry);
     </article>
 
     <nav class="neighbours" aria-label="More scraps">
-      {prev && <a class="neighbour earlier" href={`/scraps/${prev.post.id}/`}><small>← Earlier scrap</small>{titleFor(prev)}</a>}
-      {next && <a class="neighbour later" href={`/scraps/${next.post.id}/`}><small>Later scrap →</small>{titleFor(next)}</a>}
+      {prev && <a class="neighbour earlier" href={hrefFor(prev)}><small>← Earlier scrap</small>{titleFor(prev)}</a>}
+      {next && <a class="neighbour later" href={hrefFor(next)}><small>Later scrap →</small>{titleFor(next)}</a>}
     </nav>
   </main>
 </Base>

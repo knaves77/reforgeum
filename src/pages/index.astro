@@ -6,7 +6,7 @@ import Lights from '../components/Lights.astro';
 import Nav from '../components/Nav.astro';
 import Feeds from '../components/Feeds.astro';
 import site from '../data/site.json';
-import { getEverything } from '../lib/board';
+import { getEverything, hrefFor } from '../lib/board';
 
 // The board shows the latest notices; everything else lives in the archive.
 const ON_BOARD = 18;
@@ -30,14 +30,18 @@ const rest = recent.filter((e) => e !== lead);
     <Nav />
 
     <section class="pamphlets" aria-label="Latest notices">
-      {lead && <Pamphlet post={lead.post} issue={lead.issue} featured />}
+      {lead && <Pamphlet post={lead.post} issue={lead.issue} href={hrefFor(lead)} featured />}
       <aside class="sticky-note" aria-label="Note">
         <span class="tape" aria-hidden="true" />
         {site.boardNote}
       </aside>
       {
         rest.map((e) =>
-          e.kind === 'dispatch' ? <Pamphlet post={e.post} issue={e.issue} /> : <ScrapCard post={e.post} issue={e.issue} />,
+          e.kind === 'dispatch' ? (
+            <Pamphlet post={e.post} issue={e.issue} href={hrefFor(e)} />
+          ) : (
+            <ScrapCard post={e.post} issue={e.issue} href={hrefFor(e)} />
+          ),
         )
       }
     </section>

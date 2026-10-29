@@ -4,7 +4,7 @@ import { renderScrapCard } from '../../../lib/og';
 
 export const getStaticPaths = (async () => {
   const scraps = await getScraps();
-  return scraps.map(({ post, issue }) => ({ params: { id: post.id }, props: { post, issue } }));
+  return scraps.map(({ post, issue, slug }) => ({ params: { slug }, props: { post, issue } }));
 }) satisfies GetStaticPaths;
 
 export const GET: APIRoute = async ({ props }) => {

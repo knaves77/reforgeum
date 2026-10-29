@@ -50,7 +50,7 @@ export function postSchema(e: Entry) {
     author: { '@id': author['@id'] },
     publisher: { '@id': author['@id'] },
     isPartOf: { '@id': website['@id'] },
-    image: abs(`/og/${KINDS[e.kind].path}/${e.post.id}.jpg`),
+    image: abs(`/og/${KINDS[e.kind].path}/${e.slug}.jpg`),
     articleSection: KINDS[e.kind].plural,
     keywords: e.post.data.tags.join(', ') || undefined,
     wordCount: text ? text.split(' ').length : 0,

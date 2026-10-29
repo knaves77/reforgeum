@@ -4,15 +4,16 @@ import { paperFor, issueNo, fmtDate, type Dispatch } from '../lib/board';
 interface Props {
   post: Dispatch;
   issue: number;
+  href: string;
   featured?: boolean;
 }
-const { post, issue, featured = false } = Astro.props;
+const { post, issue, href, featured = false } = Astro.props;
 const { title, date, dek, stamp } = post.data;
 const paper = paperFor(post);
 const hasTabs = paper.style === 'newsprint' || paper.style === 'poster' || paper.style === 'kraft';
 ---
 <a
-  href={`/dispatches/${post.id}/`}
+  href={href}
   class:list={['pamphlet', `paper-${paper.style}`, { taped: paper.taped, featured }]}
   style={`--tilt:${featured ? paper.tilt / 3 : paper.tilt}deg; --pin:${paper.pin}; --drop:${featured ? 0 : paper.drop}px; --nudge:${paper.nudge}px`}
 >

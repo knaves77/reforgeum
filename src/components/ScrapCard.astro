@@ -5,12 +5,12 @@ import { scrapFor, fmtDate, type Scrap } from '../lib/board';
 interface Props {
   post: Scrap;
   issue: number;
+  href: string;
 }
-const { post, issue } = Astro.props;
+const { post, issue, href } = Astro.props;
 const { title, date } = post.data;
 const { Content } = await render(post);
 const look = scrapFor(post);
-const href = `/scraps/${post.id}/`;
 // Longer scraps are cut short on the board, with a link to the rest.
 const long = (post.body ?? '').length > 360;
 ---

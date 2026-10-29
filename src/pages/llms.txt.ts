@@ -6,7 +6,7 @@ import { SITE_URL } from '../lib/seo';
 
 const item = (e: Entry) => {
   const note = e.kind === 'dispatch' ? e.post.data.dek : e.post.data.title ? excerpt(e.post.body, 120) : undefined;
-  return `- [${titleFor(e)}](${SITE_URL}/${KINDS[e.kind].path}/${e.post.id}.md)${note ? `: ${note}` : ''}`;
+  return `- [${titleFor(e)}](${SITE_URL}/${KINDS[e.kind].path}/${e.slug}.md)${note ? `: ${note}` : ''}`;
 };
 
 export const GET: APIRoute = async () => {
