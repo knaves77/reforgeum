@@ -1,6 +1,6 @@
-# Reforgeum: everyone is welcome to read, index and quote these notices.
+# Reforgeum: everyone is welcome to read, index, quote and learn from these notices.
 User-agent: *
-Content-Signal: search=yes, ai-input=yes
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 Disallow: /pagefind/
 
