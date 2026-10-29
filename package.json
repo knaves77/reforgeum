@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/optimize-dist.mjs && pagefind --site dist",
+    "build": "astro build && node scripts/optimize-dist.mjs && node scripts/search-index.mjs",
     "preview": "astro preview",
     "deploy": "npm run build && wrangler deploy"
   },

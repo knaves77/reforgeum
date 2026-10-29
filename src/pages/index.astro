@@ -42,6 +42,8 @@ const rest = recent.filter((e) => e !== lead);
       }
     </section>
 
+    {all.length === 0 && <p class="more">Nothing pinned up yet. The first notice is on its way.</p>}
+
     {
       all.length > ON_BOARD && (
         <p class="more">

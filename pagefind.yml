@@ -1,0 +1,3 @@
+# Search covers dispatches and scraps only, never the board, archive or About page.
+site: dist
+glob: "{dispatches,scraps}/**/*.html"

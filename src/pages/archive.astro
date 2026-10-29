@@ -49,6 +49,8 @@ const day = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', timeZon
 
       <ol class="results" hidden></ol>
 
+      {issues.length === 0 && <p class="search-status">Nothing in the archive yet.</p>}
+
       <div class="ledger">
         {
           [...years].map(([year, months]) => (
