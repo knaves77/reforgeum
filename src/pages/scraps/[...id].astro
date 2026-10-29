@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import Nav from '../../components/Nav.astro';
 import site from '../../data/site.json';
 import { getScraps, scrapFor, issueNo, fmtDate, titleFor, excerpt } from '../../lib/board';
+import { postSchema } from '../../lib/seo';
 
 export async function getStaticPaths() {
   const scraps = await getScraps();
@@ -25,6 +26,9 @@ const name = titleFor(entry);
   description={excerpt(post.body, 160)}
   image={`/og/scraps/${post.id}.jpg`}
   imageAlt={`${name}: a scrap pinned to the ${site.title} board`}
+  article={{ published: date, section: 'Scraps', tags }}
+  schema={postSchema(entry)}
+  markdown={`/scraps/${post.id}.md`}
 >
   <main class="board board-single board-scrap">
     <Nav />

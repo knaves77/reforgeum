@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import Nav from '../../components/Nav.astro';
 import site from '../../data/site.json';
 import { getDispatches, paperFor, issueNo, fmtDate } from '../../lib/board';
+import { postSchema } from '../../lib/seo';
 
 export async function getStaticPaths() {
   const issues = await getDispatches();
@@ -18,7 +19,15 @@ const { title, date, dek, stamp, cover, tags } = post.data;
 const { Content } = await render(post);
 const paper = paperFor(post);
 ---
-<Base title={title} description={dek} image={`/og/dispatches/${post.id}.jpg`} imageAlt={`${title}: a notice pinned to the ${site.title} board`}>
+<Base
+  title={title}
+  description={dek}
+  image={`/og/dispatches/${post.id}.jpg`}
+  imageAlt={`${title}: a notice pinned to the ${site.title} board`}
+  article={{ published: date, section: 'Dispatches', tags }}
+  schema={postSchema({ kind: 'dispatch', post, issue })}
+  markdown={`/dispatches/${post.id}.md`}
+>
   <main class="board board-single">
     <Nav />
 

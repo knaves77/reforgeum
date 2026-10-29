@@ -1,0 +1,7 @@
+# Reforgeum: everyone is welcome to read, index and quote these notices.
+User-agent: *
+Content-Signal: search=yes, ai-input=yes
+Allow: /
+Disallow: /pagefind/
+
+Sitemap: https://reforgeum.com/sitemap-index.xml

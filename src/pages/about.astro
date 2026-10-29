@@ -4,11 +4,22 @@ import Base from '../layouts/Base.astro';
 import Nav from '../components/Nav.astro';
 import site from '../data/site.json';
 import Feeds from '../components/Feeds.astro';
+import { graph, website, author, SITE_URL } from '../lib/seo';
 
 const about = (await getEntry('pages', 'about'))!;
 const { Content } = await render(about);
 ---
-<Base title={about.data.title} description={about.data.dek}>
+<Base
+  title={about.data.title}
+  description={about.data.dek}
+  schema={graph(website, author, {
+    '@type': 'AboutPage',
+    url: `${SITE_URL}/about/`,
+    name: about.data.title,
+    isPartOf: { '@id': website['@id'] },
+    mainEntity: { '@id': author['@id'] },
+  })}
+>
   <main class="board board-single">
     <Nav />
     <article class="sheet paper-newsprint">

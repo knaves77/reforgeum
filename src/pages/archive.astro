@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Nav from '../components/Nav.astro';
 import site from '../data/site.json';
 import { getEverything, issueNo, hrefFor, titleFor, excerpt, KINDS } from '../lib/board';
+import { graph, website, author, SITE_URL } from '../lib/seo';
 
 const issues = (await getEverything()).reverse();
 const count = (kind: string) => issues.filter((e) => e.kind === kind).length;
@@ -21,7 +22,26 @@ for (const entry of issues) {
 
 const day = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', timeZone: 'UTC' });
 ---
-<Base title="Archive" description={`Every notice ever pinned to ${site.title}.`}>
+<Base
+  title="Archive"
+  description={`Every dispatch and scrap ever pinned to ${site.title}, searchable.`}
+  schema={graph(website, author, {
+    '@type': 'CollectionPage',
+    url: `${SITE_URL}/archive/`,
+    name: `${site.title} archive`,
+    isPartOf: { '@id': website['@id'] },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: issues.length,
+      itemListElement: issues.slice(0, 100).map((e, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: `${SITE_URL}${hrefFor(e)}`,
+        name: titleFor(e),
+      })),
+    },
+  })}
+>
   <main class="board board-single">
     <Nav />
 
