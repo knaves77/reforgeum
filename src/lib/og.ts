@@ -212,8 +212,12 @@ const filmGrain = () =>
       .asPng(),
   ));
 
-const neonSign = (size: number) =>
-  h(
+const neonSign = (maxSize: number, width = 280) => {
+  const lines = site.title.split(/\s+(?=\S+$)/);
+  // shrink long one-word names to fit the sign's column
+  const longest = Math.max(...lines.map((l) => l.length));
+  const size = Math.min(maxSize, Math.floor(width / (longest * CHAR_W.Anton)));
+  return h(
     'div',
     {
       display: 'flex',
@@ -224,7 +228,7 @@ const neonSign = (size: number) =>
       borderBottom: '3px solid #ffb45e',
       boxShadow: '0 0 18px rgba(255,170,70,0.45)',
     },
-    ...site.title.split(/\s+(?=\S+$)/).map((line) =>
+    ...lines.map((line) =>
       h(
         'div',
         {
@@ -239,6 +243,7 @@ const neonSign = (size: number) =>
       ),
     ),
   );
+};
 
 const pinHead = (color: string) =>
   h('div', {
@@ -382,7 +387,7 @@ function postBackdrop(): El {
         },
         site.tagline,
       ),
-      neonSign(76),
+      neonSign(76, 215),
       h(
         'div',
         {

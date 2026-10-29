@@ -1,4 +1,4 @@
-# Life & Times
+# Reforgeum
 
 A bulletin board of pinned pamphlets. It's built with Astro and edited through Pages CMS.
 
