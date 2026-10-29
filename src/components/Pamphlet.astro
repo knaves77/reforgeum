@@ -1,0 +1,35 @@
+---
+import { paperFor, issueNo, fmtDate, type Post } from '../lib/board';
+
+interface Props {
+  post: Post;
+  issue: number;
+  featured?: boolean;
+}
+const { post, issue, featured = false } = Astro.props;
+const { title, date, dek, stamp } = post.data;
+const paper = paperFor(post);
+const hasTabs = paper.style === 'newsprint' || paper.style === 'poster' || paper.style === 'kraft';
+---
+<a
+  href={`/posts/${post.id}/`}
+  class:list={['pamphlet', `paper-${paper.style}`, { taped: paper.taped, featured }]}
+  style={`--tilt:${featured ? paper.tilt / 3 : paper.tilt}deg; --pin:${paper.pin}; --drop:${featured ? 0 : paper.drop}px; --nudge:${paper.nudge}px`}
+>
+  <span class="pin" aria-hidden="true"></span>
+  <span class="tape" aria-hidden="true"></span>
+  {featured && <span class="flag">Latest notice</span>}
+  <p class="kicker"><span>{issueNo(issue)}</span><time datetime={date.toISOString()}>{fmtDate(date)}</time></p>
+  <h2>{title}</h2>
+  {dek && <p class="dek">{dek}</p>}
+  {stamp && <span class="stamp">{stamp}</span>}
+  {
+    hasTabs && (
+      <div class="tabs" aria-hidden="true">
+        {Array.from({ length: featured ? 9 : 6 }, (_, i) => (
+          <span class={i === paper.tornTab ? 'torn' : ''}>read on · {issueNo(issue)}</span>
+        ))}
+      </div>
+    )
+  }
+</a>

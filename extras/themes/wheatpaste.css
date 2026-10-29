@@ -1,0 +1,165 @@
+/* ─── Wheatpaste: risograph posters pasted on a concrete wall ─── */
+
+[data-theme='wheatpaste'] {
+  --frame: #bfb8ab;
+  --riso-pink: #ff48b0;
+  --riso-blue: #0078bf;
+  --riso-yellow: #ffe800;
+  --riso-green: #00a95c;
+  --riso-orange: #ff6c2f;
+  --riso-black: #1b1b1f;
+  --riso-navy: #233a8c;
+  --torn: polygon(0 1.5%, 6% 0, 13% 1.2%, 21% 0.2%, 30% 1.6%, 38% 0, 47% 1.1%, 55% 0.3%, 64% 1.5%, 72% 0, 81% 1.3%, 89% 0.2%, 100% 1%, 99.4% 22%, 100% 47%, 99.2% 75%, 100% 98.6%, 92% 100%, 84% 98.8%, 75% 99.9%, 67% 98.6%, 58% 100%, 49% 98.9%, 40% 99.8%, 31% 98.5%, 22% 100%, 13% 98.8%, 5% 99.7%, 0 98.4%, 0.7% 74%, 0 50%, 0.6% 25%);
+}
+
+[data-theme='wheatpaste'] body {
+  background-color: #d3cdc1;
+  background-image:
+    var(--grain),
+    radial-gradient(ellipse 40% 30% at 15% 25%, rgba(120, 105, 85, 0.18), transparent 70%),
+    radial-gradient(ellipse 35% 45% at 85% 70%, rgba(90, 80, 70, 0.16), transparent 70%),
+    radial-gradient(ellipse 50% 20% at 50% 100%, rgba(70, 60, 50, 0.22), transparent 80%),
+    linear-gradient(90deg, transparent 49.8%, rgba(0, 0, 0, 0.06) 50%, transparent 50.2%);
+  background-size: 200px 200px, auto, auto, auto, 640px 100%;
+  border: 0;
+  box-shadow: none;
+}
+
+/* Old posters, torn down, leaving scraps on the wall */
+[data-theme='wheatpaste'] .scraps {
+  display: block;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+[data-theme='wheatpaste'] .scraps span {
+  position: absolute;
+  opacity: 0.42;
+  transform: rotate(var(--r));
+  background-image: var(--grain);
+  clip-path: polygon(0 8%, 30% 0, 55% 12%, 80% 2%, 100% 18%, 92% 55%, 100% 82%, 64% 100%, 38% 88%, 12% 100%, 4% 60%);
+  mix-blend-mode: multiply;
+}
+
+/* Pasted flat: no pins, no tape, barely tilted, shadows only where the glue lifted */
+[data-theme='wheatpaste'] .pin,
+[data-theme='wheatpaste'] .tape { display: none !important; }
+
+[data-theme='wheatpaste'] .pamphlet,
+[data-theme='wheatpaste'] .sheet,
+[data-theme='wheatpaste'] .masthead {
+  --ink: var(--riso-blue);
+  --ink2: var(--riso-pink);
+  --stock: #f5f0e4;
+  color: var(--ink);
+  background:
+    linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.28) 42%, transparent 48%, rgba(0, 0, 0, 0.05) 70%, transparent 76%),
+    var(--grain),
+    var(--stock);
+  clip-path: var(--torn);
+  box-shadow: none;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.12));
+}
+[data-theme='wheatpaste'] .pamphlet { transform: rotate(calc(var(--tilt) * 0.3)); }
+[data-theme='wheatpaste'] .sheet { transform: none; }
+
+/* Halftone dots printed in the second ink, fading in from one corner */
+[data-theme='wheatpaste'] .pamphlet::before,
+[data-theme='wheatpaste'] .sheet::before,
+[data-theme='wheatpaste'] .masthead::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle, var(--ink2) 34%, transparent 37%) 0 0 / 7px 7px;
+  -webkit-mask-image: radial-gradient(circle at 100% 100%, #000 0, transparent 220px);
+  mask-image: radial-gradient(circle at 100% 100%, #000 0, transparent 220px);
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+}
+[data-theme='wheatpaste'] .sheet::before {
+  -webkit-mask-image: radial-gradient(circle at 100% 0%, #000 0, transparent 38%);
+  mask-image: radial-gradient(circle at 100% 0%, #000 0, transparent 38%);
+}
+
+/* Riso ink pairs per paper stock */
+[data-theme='wheatpaste'] .paper-newsprint { --ink: var(--riso-blue); --ink2: var(--riso-pink); }
+[data-theme='wheatpaste'] .paper-xerox { --ink: var(--riso-black); --ink2: var(--riso-yellow); --stock: #fbfaf6; filter: none; }
+[data-theme='wheatpaste'] .paper-index { --ink: var(--riso-navy); --ink2: var(--riso-pink); --stock: var(--riso-yellow); }
+[data-theme='wheatpaste'] .paper-carbon { --ink: var(--riso-green); --ink2: var(--riso-blue); }
+[data-theme='wheatpaste'] .paper-poster { --ink: var(--riso-navy); --ink2: var(--riso-yellow); --stock: var(--riso-pink); }
+[data-theme='wheatpaste'] .paper-kraft { --ink: var(--riso-black); --ink2: #fff; --stock: var(--riso-orange); }
+
+/* Two drums slightly out of register */
+[data-theme='wheatpaste'] .pamphlet h2,
+[data-theme='wheatpaste'] .sheet h1,
+[data-theme='wheatpaste'] .masthead h1 {
+  color: var(--ink);
+  text-shadow: 3px 2px 0 color-mix(in srgb, var(--ink2) 80%, transparent);
+}
+[data-theme='wheatpaste'] .paper-carbon h2,
+[data-theme='wheatpaste'] .paper-carbon h1,
+[data-theme='wheatpaste'] .paper-index h2,
+[data-theme='wheatpaste'] .paper-index h1 {
+  text-shadow: 1.5px 1px 0 color-mix(in srgb, var(--ink2) 55%, transparent);
+}
+[data-theme='wheatpaste'] .paper-xerox h2,
+[data-theme='wheatpaste'] .paper-xerox h1 { text-shadow: 3px 2px 0 var(--riso-yellow); }
+
+[data-theme='wheatpaste'] .paper-index {
+  background:
+    repeating-linear-gradient(transparent 0 27px, rgba(35, 58, 140, 0.25) 27px 28px) 0 48px / 100% 100%,
+    var(--grain),
+    var(--stock);
+}
+
+[data-theme='wheatpaste'] .kicker,
+[data-theme='wheatpaste'] .tabs,
+[data-theme='wheatpaste'] .tabs span,
+[data-theme='wheatpaste'] .sheet-footer { border-color: color-mix(in srgb, var(--ink) 55%, transparent); }
+
+[data-theme='wheatpaste'] .stamp { color: var(--ink); mix-blend-mode: normal; }
+[data-theme='wheatpaste'] .prose blockquote { border-color: var(--ink2); }
+[data-theme='wheatpaste'] .paper-carbon .kicker::after { border-color: var(--ink); }
+
+/* Masthead: a huge yellow poster */
+[data-theme='wheatpaste'] .masthead {
+  --ink: var(--riso-blue);
+  --ink2: var(--riso-pink);
+  --stock: var(--riso-yellow);
+  transform: rotate(-0.4deg);
+  padding: 36px 28px 30px;
+}
+[data-theme='wheatpaste'] .masthead::before {
+  -webkit-mask-image: radial-gradient(circle at 0% 100%, #000 0, transparent 55%);
+  mask-image: radial-gradient(circle at 0% 100%, #000 0, transparent 55%);
+}
+[data-theme='wheatpaste'] .masthead h1 {
+  border-color: var(--ink);
+  font-size: clamp(3.6rem, 13vw, 9rem);
+  text-shadow: 5px 4px 0 color-mix(in srgb, var(--riso-pink) 85%, transparent);
+}
+[data-theme='wheatpaste'] .masthead-kicker { color: var(--riso-pink); }
+[data-theme='wheatpaste'] .masthead-sub { color: var(--ink); }
+
+[data-theme='wheatpaste'] .sticky-note {
+  background: var(--riso-green);
+  color: #fff;
+  box-shadow: none;
+}
+[data-theme='wheatpaste'] .sticky-note .tape { display: none; }
+
+[data-theme='wheatpaste'] .scrap {
+  color: var(--riso-black);
+  background: var(--riso-yellow);
+  box-shadow: none;
+}
+[data-theme='wheatpaste'] .scrap small { color: var(--riso-pink); }
+
+[data-theme='wheatpaste'] .back,
+[data-theme='wheatpaste'] .board-footer,
+[data-theme='wheatpaste'] .board-footer a {
+  color: var(--riso-black);
+  text-shadow: none;
+}

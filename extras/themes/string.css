@@ -1,0 +1,145 @@
+/* ─── Red string: a case wall on green felt, every notice connected ─── */
+
+[data-theme='string'] {
+  --frame: #241509;
+  --yarn: #c0161d;
+  --chalk: #efe8d6;
+}
+
+[data-theme='string'] body {
+  background-color: #23362b;
+  background-image:
+    var(--grain),
+    var(--grain),
+    radial-gradient(ellipse 70% 60% at 50% 35%, #2f4a3a 0, transparent 75%),
+    radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.45) 100%);
+  background-size: 140px 140px, 220px 220px, auto, auto;
+  border-color: var(--frame);
+  box-shadow: inset 0 0 0 3px #6d4a2a, inset 0 0 60px rgba(0, 0, 0, 0.6);
+}
+
+/* Pins are drawn on top of the yarn by script, so hide the paper ones
+   (they stay in place to be measured). */
+[data-theme='string'] .pamphlet > .pin,
+[data-theme='string'] .masthead > .pin {
+  display: block !important;
+  visibility: hidden;
+}
+[data-theme='string'] .pamphlet > .tape { display: none !important; }
+
+[data-theme='string'] .yarn {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 6;
+  pointer-events: none;
+  overflow: visible;
+}
+[data-theme='string'] .yarn .thread {
+  fill: none;
+  stroke: var(--yarn);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  filter: drop-shadow(2px 5px 2px rgba(0, 0, 0, 0.45));
+}
+[data-theme='string'] .yarn .head {
+  fill: #d7262d;
+  stroke: #7d0b10;
+  stroke-width: 1.5;
+  filter: drop-shadow(3px 6px 3px rgba(0, 0, 0, 0.5));
+}
+
+[data-theme='string'] .pamphlet,
+[data-theme='string'] .sheet {
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3), 0 18px 24px -12px rgba(0, 0, 0, 0.8);
+}
+[data-theme='string'] .pamphlets { column-gap: 56px; }
+[data-theme='string'] .pamphlet { margin-bottom: 72px; }
+
+/* Chalk notes on the felt, just above each notice */
+[data-theme='string'] .note {
+  display: block;
+  position: absolute;
+  top: -40px;
+  right: 6px;
+  font-family: var(--f-hand);
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--chalk);
+  opacity: 0.85;
+  transform: rotate(calc(var(--tilt) * -1 - 3deg));
+  text-shadow: 0 0 1px rgba(239, 232, 214, 0.6);
+}
+
+/* Each issue number circled in red marker */
+[data-theme='string'] .pamphlet .kicker span:first-child,
+[data-theme='string'] .sheet .kicker span:first-child {
+  position: relative;
+}
+[data-theme='string'] .pamphlet .kicker span:first-child::after,
+[data-theme='string'] .sheet .kicker span:first-child::after {
+  content: '';
+  position: absolute;
+  inset: -7px -10px -6px -9px;
+  border: 2px solid var(--yarn);
+  border-radius: 55% 45% 50% 50% / 60% 50% 50% 40%;
+  transform: rotate(-4deg);
+  opacity: 0.85;
+}
+
+/* Masthead: a manila case folder */
+[data-theme='string'] .masthead {
+  margin-top: 40px;
+  background: #e4c98e var(--grain);
+  border-radius: 0 6px 6px 6px;
+  transform: rotate(-0.8deg);
+}
+[data-theme='string'] .masthead::before {
+  content: 'Case file · open';
+  position: absolute;
+  top: -30px;
+  left: 0;
+  padding: 7px 22px 6px;
+  font-family: var(--f-type);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: #e4c98e var(--grain);
+  border-radius: 8px 8px 0 0;
+}
+[data-theme='string'] .masthead::after {
+  content: 'Ongoing';
+  position: absolute;
+  right: 22px;
+  bottom: 18px;
+  padding: 2px 10px;
+  font-family: var(--f-stencil);
+  font-size: 1.1rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--yarn);
+  border: 3px solid currentColor;
+  transform: rotate(-9deg);
+  opacity: 0.8;
+  mix-blend-mode: multiply;
+}
+[data-theme='string'] .masthead h1 {
+  font-family: var(--f-type);
+  letter-spacing: 0.04em;
+  border-width: 0;
+  padding: 2px 0;
+}
+[data-theme='string'] .masthead-kicker { color: var(--yarn); }
+
+[data-theme='string'] .sticky-note {
+  background: #f6a5b4;
+  margin-bottom: 72px;
+}
+
+[data-theme='string'] .back,
+[data-theme='string'] .board-footer,
+[data-theme='string'] .board-footer a {
+  color: var(--chalk);
+}

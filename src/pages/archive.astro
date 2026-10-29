@@ -1,0 +1,167 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import site from '../data/site.json';
+import { getIssues, issueNo } from '../lib/board';
+
+const issues = (await getIssues()).reverse();
+
+// Group newest first: year → month → notices.
+const years = new Map<number, Map<string, typeof issues>>();
+for (const entry of issues) {
+  const d = entry.post.data.date;
+  const year = d.getUTCFullYear();
+  const month = d.toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
+  if (!years.has(year)) years.set(year, new Map());
+  const months = years.get(year)!;
+  if (!months.has(month)) months.set(month, []);
+  months.get(month)!.push(entry);
+}
+
+const day = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', timeZone: 'UTC' });
+---
+<Base title="Archive" description={`Every notice ever pinned to ${site.title}.`}>
+  <main class="board board-single">
+    <Nav />
+
+    <article class="sheet paper-newsprint archive">
+      <span class="pin pin-left" style="--pin:#2f6db3" aria-hidden="true"></span>
+      <span class="pin pin-right" style="--pin:#c8372d" aria-hidden="true"></span>
+
+      <header>
+        <p class="kicker"><span>{site.title}</span><span>{issues.length} notices</span></p>
+        <h1>The Archive</h1>
+        <p class="dek">Every notice that's been pinned up, oldest at the bottom.</p>
+      </header>
+
+      <form class="search" role="search" action="/archive/">
+        <label for="q" class="visually-hidden">Search the notices</label>
+        <input id="q" name="q" type="search" placeholder="search the notices…" autocomplete="off" spellcheck="false" />
+        <p class="search-status" aria-live="polite"></p>
+      </form>
+
+      <ol class="results" hidden></ol>
+
+      <div class="ledger">
+        {
+          [...years].map(([year, months]) => (
+            <section class="year">
+              <h2>{year}</h2>
+              {[...months].map(([month, entries]) => (
+                <section class="month">
+                  <h3>{month}</h3>
+                  <ol>
+                    {entries.map(({ post, issue }) => (
+                      <li>
+                        <a href={`/posts/${post.id}/`}>
+                          <span class="day">{day(post.data.date)}</span>
+                          <span class="entry">
+                            <span class="entry-title">{post.data.title}</span>
+                            {post.data.dek && <span class="entry-dek">{post.data.dek}</span>}
+                          </span>
+                          <span class="no">{issueNo(issue)}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              ))}
+            </section>
+          ))
+        }
+      </div>
+    </article>
+  </main>
+
+  <script>
+    // Full-text search with Pagefind. Its index is built after `astro build`,
+    // and only downloaded once someone starts typing.
+    type Pagefind = {
+      init: () => Promise<void>;
+      debouncedSearch: (q: string, opts?: object, ms?: number) => Promise<{ results: { data: () => Promise<Hit> }[] } | null>;
+    };
+    type Hit = { url: string; excerpt: string; meta: { title?: string; date?: string } };
+
+    const input = document.querySelector<HTMLInputElement>('#q')!;
+    const form = input.form!;
+    const status = document.querySelector<HTMLElement>('.search-status')!;
+    const list = document.querySelector<HTMLOListElement>('.results')!;
+    const ledger = document.querySelector<HTMLElement>('.ledger')!;
+
+    let pagefind: Promise<Pagefind> | undefined;
+    const load = () =>
+      (pagefind ??= import(/* @vite-ignore */ `${'/pagefind/'}pagefind.js`).then(async (pf: Pagefind) => {
+        await pf.init();
+        return pf;
+      }));
+
+    async function run(q: string) {
+      const query = q.trim();
+      const url = new URL(location.href);
+      query ? url.searchParams.set('q', query) : url.searchParams.delete('q');
+      history.replaceState(null, '', url);
+
+      if (!query) {
+        list.hidden = true;
+        ledger.hidden = false;
+        status.textContent = '';
+        return;
+      }
+
+      let pf: Pagefind;
+      try {
+        pf = await load();
+      } catch {
+        status.textContent = 'Search is only available on the built site.';
+        return;
+      }
+      const search = await pf.debouncedSearch(query, {}, 180);
+      if (!search) return; // a newer keystroke superseded this one
+      const hits = await Promise.all(search.results.slice(0, 30).map((r) => r.data()));
+      if (input.value.trim() !== query) return;
+
+      list.replaceChildren(
+        ...hits.map((hit) => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = hit.url;
+          const title = document.createElement('span');
+          title.className = 'entry-title';
+          title.textContent = hit.meta.title ?? hit.url;
+          const meta = document.createElement('span');
+          meta.className = 'day';
+          meta.textContent = hit.meta.date ?? '';
+          const excerpt = document.createElement('span');
+          excerpt.className = 'entry-dek';
+          excerpt.innerHTML = hit.excerpt; // Pagefind's excerpt of our own posts, with <mark>s
+          const entry = document.createElement('span');
+          entry.className = 'entry';
+          entry.append(title, excerpt);
+          a.append(meta, entry);
+          li.append(a);
+          return li;
+        }),
+      );
+      const n = search.results.length;
+      status.textContent = n ? `${n} notice${n === 1 ? '' : 's'} mention “${query}”` : `Nothing pinned up about “${query}” yet.`;
+      list.hidden = false;
+      ledger.hidden = true;
+    }
+
+    input.addEventListener('focus', () => void load().catch(() => {}), { once: true });
+    input.addEventListener('input', () => void run(input.value));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        input.value = '';
+        void run('');
+      }
+    });
+    form.addEventListener('submit', (e) => e.preventDefault());
+
+    const initial = new URLSearchParams(location.search).get('q');
+    if (initial) {
+      input.value = initial;
+      void run(initial);
+    }
+  </script>
+</Base>

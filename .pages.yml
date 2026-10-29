@@ -1,0 +1,87 @@
+# Pages CMS config: https://pagescms.org/docs/configuration/
+media:
+  input: public/uploads
+  output: /uploads
+  rename: safe
+  categories: [image]
+
+content:
+  - name: posts
+    label: Pamphlets
+    type: collection
+    path: src/content/posts
+    format: yaml-frontmatter
+    filename: "{year}-{month}-{day}-{primary}.md"
+    view:
+      fields: [title, date, style]
+      primary: title
+      sort: date
+      order: desc
+    fields:
+      - name: title
+        label: Headline
+        type: string
+        required: true
+      - name: date
+        label: Date
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: dek
+        label: One-liner (shown on the board)
+        type: string
+      - name: style
+        label: Paper
+        description: Leave empty and the board picks one for you.
+        type: select
+        options:
+          values:
+            - { name: newsprint, label: Newsprint }
+            - { name: xerox, label: Photocopy }
+            - { name: index, label: Index card }
+            - { name: carbon, label: Carbon copy }
+            - { name: poster, label: Protest poster }
+            - { name: kraft, label: Brown kraft paper }
+      - name: stamp
+        label: Rubber stamp (optional)
+        description: A couple of words, like "For the tired".
+        type: string
+      - name: cover
+        label: Cover image (optional)
+        type: image
+      - name: tags
+        label: Tags
+        type: string
+        list: true
+      - name: draft
+        label: Draft (hide from the board)
+        type: boolean
+        default: false
+      - name: body
+        label: Post
+        type: rich-text
+        options:
+          format: markdown
+
+  - name: about
+    label: About page
+    type: file
+    path: src/content/pages/about.md
+    format: yaml-frontmatter
+    fields:
+      - { name: title, label: Title, type: string, required: true }
+      - { name: dek, label: One-liner, type: string }
+      - { name: body, label: Text, type: rich-text, options: { format: markdown } }
+
+  - name: site
+    label: Board settings
+    type: file
+    path: src/data/site.json
+    format: json
+    fields:
+      - { name: title, label: Board name, type: string }
+      - { name: tagline, label: Tagline, type: string }
+      - { name: subtitle, label: Subtitle, type: text }
+      - { name: author, label: Author, type: string }
+      - { name: boardNote, label: Sticky note, type: string }

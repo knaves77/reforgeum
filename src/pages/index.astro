@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import Pamphlet from '../components/Pamphlet.astro';
+import Lights from '../components/Lights.astro';
+import Nav from '../components/Nav.astro';
+import site from '../data/site.json';
+import { getIssues } from '../lib/board';
+
+// The board shows the latest notices; everything else lives in the archive.
+const ON_BOARD = 12;
+const all = (await getIssues()).reverse();
+const issues = all.slice(0, ON_BOARD);
+---
+<Base>
+  <main class="board">
+    <Lights />
+
+    <header class="masthead">
+      <p class="masthead-kicker">{site.tagline}</p>
+      <h1>{site.title}</h1>
+      <p class="masthead-sub">{site.subtitle}</p>
+    </header>
+
+    <Nav />
+
+    <section class="pamphlets" aria-label="Latest notices">
+      {issues.map(({ post, issue }, i) => (
+        <>
+          <Pamphlet post={post} issue={issue} featured={i === 0} />
+          {i === 0 && (
+            <aside class="sticky-note" aria-label="Note">
+              <span class="tape" aria-hidden="true" />
+              {site.boardNote}
+            </aside>
+          )}
+        </>
+      ))}
+    </section>
+
+    {
+      all.length > ON_BOARD && (
+        <p class="more">
+          <a href="/archive/">{all.length - ON_BOARD} older notices are in the archive →</a>
+        </p>
+      )
+    }
+
+    <footer class="board-footer">
+      <span>Pinned up by {site.author}</span>
+      <span>{new Date().getFullYear()}</span>
+    </footer>
+  </main>
+</Base>

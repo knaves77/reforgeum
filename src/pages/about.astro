@@ -1,0 +1,30 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import site from '../data/site.json';
+
+const about = (await getEntry('pages', 'about'))!;
+const { Content } = await render(about);
+---
+<Base title={about.data.title} description={about.data.dek}>
+  <main class="board board-single">
+    <Nav />
+    <article class="sheet paper-newsprint">
+      <span class="pin pin-left" style="--pin:#c8372d" aria-hidden="true"></span>
+      <span class="pin pin-right" style="--pin:#e0b12a" aria-hidden="true"></span>
+      <header>
+        <p class="kicker"><span>{site.title}</span><span>About</span></p>
+        <h1>{about.data.title}</h1>
+        {about.data.dek && <p class="dek">{about.data.dek}</p>}
+      </header>
+      <div class="prose">
+        <Content />
+      </div>
+      <footer class="sheet-footer">
+        <span>{site.author}</span>
+        <a href="/rss.xml">Follow by RSS</a>
+      </footer>
+    </article>
+  </main>
+</Base>

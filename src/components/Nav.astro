@@ -1,0 +1,18 @@
+---
+const links = [
+  ['/', 'Board'],
+  ['/archive/', 'Archive'],
+  ['/about/', 'About'],
+  ['/rss.xml', 'RSS'],
+];
+const here = Astro.url.pathname;
+---
+<nav class="site-nav" aria-label="Site">
+  {
+    links.map(([href, label]) => (
+      <a href={href} aria-current={here === href ? 'page' : undefined}>
+        {label}
+      </a>
+    ))
+  }
+</nav>

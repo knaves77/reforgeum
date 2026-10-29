@@ -1,0 +1,56 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import site from '../../data/site.json';
+import { getIssues, paperFor, issueNo, fmtDate } from '../../lib/board';
+
+export async function getStaticPaths() {
+  const issues = await getIssues();
+  return issues.map(({ post, issue }, i) => ({
+    params: { id: post.id },
+    props: { post, issue, prev: issues[i - 1]?.post, next: issues[i + 1]?.post },
+  }));
+}
+
+const { post, issue, prev, next } = Astro.props;
+const { title, date, dek, stamp, cover, tags } = post.data;
+const { Content } = await render(post);
+const paper = paperFor(post);
+---
+<Base title={title} description={dek} image={`/og/${post.id}.jpg`} imageAlt={`${title}: a notice pinned to the ${site.title} board`}>
+  <main class="board board-single">
+    <Nav />
+
+    <article class={`sheet paper-${paper.style}`} data-pagefind-body>
+      <span class="pin pin-left" style={`--pin:${paper.pin}`} aria-hidden="true"></span>
+      <span class="pin pin-right" style={`--pin:${paper.pin}`} aria-hidden="true"></span>
+
+      <header>
+        <p class="kicker" data-pagefind-ignore>
+          <span><span class="kicker-site">{site.title} · </span>{issueNo(issue)}</span>
+          <time datetime={date.toISOString()} data-pagefind-meta="date">{fmtDate(date)}</time>
+        </p>
+        <h1 data-pagefind-meta="title">{title}</h1>
+        {dek && <p class="dek">{dek}</p>}
+        {stamp && <span class="stamp">{stamp}</span>}
+      </header>
+
+      {cover && <img class="cover" src={cover} alt="" fetchpriority="high" />}
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      <footer class="sheet-footer" data-pagefind-ignore>
+        <span>{site.author}</span>
+        {tags.length > 0 && <span>filed under: {tags.join(', ')}</span>}
+      </footer>
+    </article>
+
+    <nav class="neighbours" aria-label="More notices">
+      {prev && <a class="scrap earlier" href={`/posts/${prev.id}/`}><small>← Earlier</small>{prev.data.title}</a>}
+      {next && <a class="scrap later" href={`/posts/${next.id}/`}><small>Later →</small>{next.data.title}</a>}
+    </nav>
+  </main>
+</Base>

@@ -1,0 +1,21 @@
+---
+// String lights: two swags, bulbs following each curve.
+const SWAGS = 2;
+const PER_SWAG = 9;
+const SAG = 46;
+const bulbs = Array.from({ length: SWAGS }, (_, s) =>
+  Array.from({ length: PER_SWAG }, (_, i) => {
+    const t = (i + 0.5) / PER_SWAG;
+    return { x: ((s + t) / SWAGS) * 100, y: 4 + SAG * 4 * t * (1 - t), delay: ((s * PER_SWAG + i) * 0.37) % 3 };
+  }),
+).flat();
+const wire = Array.from({ length: SWAGS }, (_, s) => {
+  const x0 = (s / SWAGS) * 100;
+  const x1 = ((s + 1) / SWAGS) * 100;
+  return `M${x0},4 Q${(x0 + x1) / 2},${4 + SAG * 2} ${x1},4`;
+}).join(' ');
+---
+<div class="lights" aria-hidden="true">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d={wire} /></svg>
+  {bulbs.map((b) => <span style={`left:${b.x.toFixed(2)}%;top:${b.y.toFixed(1)}px;animation-delay:${b.delay.toFixed(2)}s`} />)}
+</div>

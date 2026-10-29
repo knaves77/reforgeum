@@ -1,0 +1,18 @@
+// Cloudflare Worker that serves the built site as static assets.
+// Deployed by Workers Builds on every push to main (including Pages CMS edits).
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "reforgeum",
+  // Sushanth's Cloudflare account, so a deploy can never land anywhere else
+  "account_id": "ca616c9b91da735f0925c64943a82163",
+  "compatibility_date": "2026-10-29",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  "routes": [
+    { "pattern": "reforgeum.com", "custom_domain": true },
+    { "pattern": "www.reforgeum.com", "custom_domain": true }
+  ]
+}
