@@ -1,0 +1,2 @@
+# Posts moved to /dispatches/ when scraps arrived (29 Oct 2026).
+/posts/* /dispatches/:splat 301

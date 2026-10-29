@@ -3,10 +3,10 @@ import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Nav from '../../components/Nav.astro';
 import site from '../../data/site.json';
-import { getIssues, paperFor, issueNo, fmtDate } from '../../lib/board';
+import { getDispatches, paperFor, issueNo, fmtDate } from '../../lib/board';
 
 export async function getStaticPaths() {
-  const issues = await getIssues();
+  const issues = await getDispatches();
   return issues.map(({ post, issue }, i) => ({
     params: { id: post.id },
     props: { post, issue, prev: issues[i - 1]?.post, next: issues[i + 1]?.post },
@@ -18,17 +18,17 @@ const { title, date, dek, stamp, cover, tags } = post.data;
 const { Content } = await render(post);
 const paper = paperFor(post);
 ---
-<Base title={title} description={dek} image={`/og/${post.id}.jpg`} imageAlt={`${title}: a notice pinned to the ${site.title} board`}>
+<Base title={title} description={dek} image={`/og/dispatches/${post.id}.jpg`} imageAlt={`${title}: a notice pinned to the ${site.title} board`}>
   <main class="board board-single">
     <Nav />
 
-    <article class={`sheet paper-${paper.style}`} data-pagefind-body>
+    <article class={`sheet paper-${paper.style}`} data-pagefind-body data-pagefind-meta="kind:Dispatch">
       <span class="pin pin-left" style={`--pin:${paper.pin}`} aria-hidden="true"></span>
       <span class="pin pin-right" style={`--pin:${paper.pin}`} aria-hidden="true"></span>
 
       <header>
         <p class="kicker" data-pagefind-ignore>
-          <span><span class="kicker-site">{site.title} · </span>{issueNo(issue)}</span>
+          <span><span class="kicker-site">{site.title} · </span>Dispatch {issueNo(issue)}</span>
           <time datetime={date.toISOString()} data-pagefind-meta="date">{fmtDate(date)}</time>
         </p>
         <h1 data-pagefind-meta="title">{title}</h1>
@@ -48,9 +48,9 @@ const paper = paperFor(post);
       </footer>
     </article>
 
-    <nav class="neighbours" aria-label="More notices">
-      {prev && <a class="scrap earlier" href={`/posts/${prev.id}/`}><small>← Earlier</small>{prev.data.title}</a>}
-      {next && <a class="scrap later" href={`/posts/${next.id}/`}><small>Later →</small>{next.data.title}</a>}
+    <nav class="neighbours" aria-label="More dispatches">
+      {prev && <a class="neighbour earlier" href={`/dispatches/${prev.id}/`}><small>← Earlier</small>{prev.data.title}</a>}
+      {next && <a class="neighbour later" href={`/dispatches/${next.id}/`}><small>Later →</small>{next.data.title}</a>}
     </nav>
   </main>
 </Base>

@@ -1,0 +1,57 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import site from '../../data/site.json';
+import { getScraps, scrapFor, issueNo, fmtDate, titleFor, excerpt } from '../../lib/board';
+
+export async function getStaticPaths() {
+  const scraps = await getScraps();
+  return scraps.map((entry, i) => ({
+    params: { id: entry.post.id },
+    props: { entry, prev: scraps[i - 1], next: scraps[i + 1] },
+  }));
+}
+
+const { entry, prev, next } = Astro.props;
+const { post, issue } = entry;
+const { title, date, tags } = post.data;
+const { Content } = await render(post);
+const look = scrapFor(post);
+const name = titleFor(entry);
+---
+<Base
+  title={title ?? `Scrap ${issueNo(issue)}`}
+  description={excerpt(post.body, 160)}
+  image={`/og/scraps/${post.id}.jpg`}
+  imageAlt={`${name}: a scrap pinned to the ${site.title} board`}
+>
+  <main class="board board-single board-scrap">
+    <Nav />
+
+    <article
+      class:list={['scrap-card', 'scrap-sheet', `stock-${look.stock}`, { taped: look.taped }]}
+      style={`--tilt:${look.tilt / 3}deg; --pin:${look.pin}`}
+      data-pagefind-body
+      data-pagefind-meta={`kind:Scrap`}
+    >
+      <span class="pin" aria-hidden="true"></span>
+      <span class="tape" aria-hidden="true"></span>
+      <p class="scrap-meta" data-pagefind-ignore>
+        <span>Scrap {issueNo(issue)}</span>
+        <time datetime={date.toISOString()} data-pagefind-meta="date">{fmtDate(date)}</time>
+      </p>
+      <h1 data-pagefind-meta="title" class:list={{ 'visually-hidden': !title }}>{name}</h1>
+      <div class="scrap-text"><Content /></div>
+      <footer class="scrap-meta scrap-foot" data-pagefind-ignore>
+        <span>{site.author}</span>
+        {tags.length > 0 && <span>filed under: {tags.join(', ')}</span>}
+      </footer>
+    </article>
+
+    <nav class="neighbours" aria-label="More scraps">
+      {prev && <a class="neighbour earlier" href={`/scraps/${prev.post.id}/`}><small>← Earlier scrap</small>{titleFor(prev)}</a>}
+      {next && <a class="neighbour later" href={`/scraps/${next.post.id}/`}><small>Later scrap →</small>{titleFor(next)}</a>}
+    </nav>
+  </main>
+</Base>

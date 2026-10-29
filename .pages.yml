@@ -6,10 +6,11 @@ media:
   categories: [image]
 
 content:
-  - name: posts
-    label: Pamphlets
+  - name: dispatches
+    label: Dispatches
+    description: The long ones. Essays and ramblings, pinned up as pamphlets.
     type: collection
-    path: src/content/posts
+    path: src/content/dispatches
     format: yaml-frontmatter
     filename: "{year}-{month}-{day}-{primary}.md"
     view:
@@ -60,6 +61,43 @@ content:
         default: false
       - name: body
         label: Post
+        type: rich-text
+        options:
+          format: markdown
+
+  - name: scraps
+    label: Scraps
+    description: The short ones. Notes read right on the board.
+    type: collection
+    path: src/content/scraps
+    format: yaml-frontmatter
+    # Scraps may have no title, so name files by when they were written.
+    filename: "{year}-{month}-{day}-{hour}{minute}{second}.md"
+    view:
+      fields: [date, title]
+      primary: date
+      sort: date
+      order: desc
+    fields:
+      - name: date
+        label: Date
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: title
+        label: Title (optional)
+        type: string
+      - name: tags
+        label: Tags
+        type: string
+        list: true
+      - name: draft
+        label: Draft (hide from the board)
+        type: boolean
+        default: false
+      - name: body
+        label: Scrap
         type: rich-text
         options:
           format: markdown

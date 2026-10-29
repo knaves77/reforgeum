@@ -1,0 +1,30 @@
+---
+import { render } from 'astro:content';
+import { scrapFor, fmtDate, type Scrap } from '../lib/board';
+
+interface Props {
+  post: Scrap;
+  issue: number;
+}
+const { post, issue } = Astro.props;
+const { title, date } = post.data;
+const { Content } = await render(post);
+const look = scrapFor(post);
+const href = `/scraps/${post.id}/`;
+// Longer scraps are cut short on the board, with a link to the rest.
+const long = (post.body ?? '').length > 360;
+---
+<article
+  class:list={['scrap-card', `stock-${look.stock}`, { taped: look.taped, long }]}
+  style={`--tilt:${look.tilt * 1.2}deg; --pin:${look.pin}; --drop:${look.drop}px; --nudge:${look.nudge}px`}
+>
+  <span class="pin" aria-hidden="true"></span>
+  <span class="tape" aria-hidden="true"></span>
+  <p class="scrap-meta">
+    <a href={href}>Scrap {String(issue).padStart(3, "0")}</a>
+    <time datetime={date.toISOString()}>{fmtDate(date)}</time>
+  </p>
+  {title && <h3><a href={href}>{title}</a></h3>}
+  <div class="scrap-text"><Content /></div>
+  {long && <a class="read-on" href={href}>read the rest →</a>}
+</article>

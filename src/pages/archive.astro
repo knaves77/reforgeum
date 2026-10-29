@@ -2,9 +2,10 @@
 import Base from '../layouts/Base.astro';
 import Nav from '../components/Nav.astro';
 import site from '../data/site.json';
-import { getIssues, issueNo } from '../lib/board';
+import { getEverything, issueNo, hrefFor, titleFor, excerpt, KINDS } from '../lib/board';
 
-const issues = (await getIssues()).reverse();
+const issues = (await getEverything()).reverse();
+const count = (kind: string) => issues.filter((e) => e.kind === kind).length;
 
 // Group newest first: year → month → notices.
 const years = new Map<number, Map<string, typeof issues>>();
@@ -31,8 +32,14 @@ const day = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', timeZon
       <header>
         <p class="kicker"><span>{site.title}</span><span>{issues.length} notices</span></p>
         <h1>The Archive</h1>
-        <p class="dek">Every notice that's been pinned up, oldest at the bottom.</p>
+        <p class="dek">Every dispatch and scrap that's been pinned up, oldest at the bottom.</p>
       </header>
+
+      <div class="kind-filter" role="group" aria-label="Show">
+        <button type="button" data-kind="" aria-pressed="true">All <span>{issues.length}</span></button>
+        <button type="button" data-kind="dispatch" aria-pressed="false">Dispatches <span>{count('dispatch')}</span></button>
+        <button type="button" data-kind="scrap" aria-pressed="false">Scraps <span>{count('scrap')}</span></button>
+      </div>
 
       <form class="search" role="search" action="/archive/">
         <label for="q" class="visually-hidden">Search the notices</label>
@@ -51,15 +58,18 @@ const day = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', timeZon
                 <section class="month">
                   <h3>{month}</h3>
                   <ol>
-                    {entries.map(({ post, issue }) => (
-                      <li>
-                        <a href={`/posts/${post.id}/`}>
-                          <span class="day">{day(post.data.date)}</span>
+                    {entries.map((e) => (
+                      <li data-kind={e.kind}>
+                        <a href={hrefFor(e)}>
+                          <span class="day">{day(e.post.data.date)}</span>
                           <span class="entry">
-                            <span class="entry-title">{post.data.title}</span>
-                            {post.data.dek && <span class="entry-dek">{post.data.dek}</span>}
+                            <span class="entry-title">{titleFor(e)}</span>
+                            {e.kind === 'dispatch' && e.post.data.dek && <span class="entry-dek">{e.post.data.dek}</span>}
+                            {e.kind === 'scrap' && e.post.data.title && <span class="entry-dek">{excerpt(e.post.body, 110)}</span>}
                           </span>
-                          <span class="no">{issueNo(issue)}</span>
+                          <span class="no">
+                            <span class="kind">{KINDS[e.kind].label}</span> {issueNo(e.issue).replace('No. ', '')}
+                          </span>
                         </a>
                       </li>
                     ))}
@@ -80,13 +90,35 @@ const day = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', timeZon
       init: () => Promise<void>;
       debouncedSearch: (q: string, opts?: object, ms?: number) => Promise<{ results: { data: () => Promise<Hit> }[] } | null>;
     };
-    type Hit = { url: string; excerpt: string; meta: { title?: string; date?: string } };
+    type Hit = { url: string; excerpt: string; meta: { title?: string; date?: string; kind?: string } };
 
     const input = document.querySelector<HTMLInputElement>('#q')!;
     const form = input.form!;
     const status = document.querySelector<HTMLElement>('.search-status')!;
     const list = document.querySelector<HTMLOListElement>('.results')!;
     const ledger = document.querySelector<HTMLElement>('.ledger')!;
+
+    // All / Dispatches / Scraps
+    let kind = new URLSearchParams(location.search).get('kind') ?? '';
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>('.kind-filter button')];
+    function applyKind() {
+      for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.kind === kind));
+      for (const li of document.querySelectorAll<HTMLElement>('.ledger li, .results li')) {
+        li.hidden = !!kind && li.dataset.kind !== kind;
+      }
+      for (const section of document.querySelectorAll<HTMLElement>('.ledger .month, .ledger .year')) {
+        section.hidden = !section.querySelector('li:not([hidden])');
+      }
+      const url = new URL(location.href);
+      kind ? url.searchParams.set('kind', kind) : url.searchParams.delete('kind');
+      history.replaceState(null, '', url);
+    }
+    for (const b of buttons)
+      b.addEventListener('click', () => {
+        kind = b.dataset.kind ?? '';
+        applyKind();
+      });
+    applyKind();
 
     let pagefind: Promise<Pagefind> | undefined;
     const load = () =>
@@ -123,6 +155,7 @@ const day = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', timeZon
       list.replaceChildren(
         ...hits.map((hit) => {
           const li = document.createElement('li');
+          li.dataset.kind = hit.meta.kind?.toLowerCase() ?? '';
           const a = document.createElement('a');
           a.href = hit.url;
           const title = document.createElement('span');
@@ -130,7 +163,7 @@ const day = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', timeZon
           title.textContent = hit.meta.title ?? hit.url;
           const meta = document.createElement('span');
           meta.className = 'day';
-          meta.textContent = hit.meta.date ?? '';
+          meta.textContent = [hit.meta.kind, hit.meta.date].filter(Boolean).join(' · ');
           const excerpt = document.createElement('span');
           excerpt.className = 'entry-dek';
           excerpt.innerHTML = hit.excerpt; // Pagefind's excerpt of our own posts, with <mark>s
@@ -146,6 +179,7 @@ const day = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', timeZon
       status.textContent = n ? `${n} notice${n === 1 ? '' : 's'} mention “${query}”` : `Nothing pinned up about “${query}” yet.`;
       list.hidden = false;
       ledger.hidden = true;
+      applyKind();
     }
 
     input.addEventListener('focus', () => void load().catch(() => {}), { once: true });

@@ -1,8 +1,8 @@
 ---
-import { paperFor, issueNo, fmtDate, type Post } from '../lib/board';
+import { paperFor, issueNo, fmtDate, type Dispatch } from '../lib/board';
 
 interface Props {
-  post: Post;
+  post: Dispatch;
   issue: number;
   featured?: boolean;
 }
@@ -12,14 +12,14 @@ const paper = paperFor(post);
 const hasTabs = paper.style === 'newsprint' || paper.style === 'poster' || paper.style === 'kraft';
 ---
 <a
-  href={`/posts/${post.id}/`}
+  href={`/dispatches/${post.id}/`}
   class:list={['pamphlet', `paper-${paper.style}`, { taped: paper.taped, featured }]}
   style={`--tilt:${featured ? paper.tilt / 3 : paper.tilt}deg; --pin:${paper.pin}; --drop:${featured ? 0 : paper.drop}px; --nudge:${paper.nudge}px`}
 >
   <span class="pin" aria-hidden="true"></span>
   <span class="tape" aria-hidden="true"></span>
-  {featured && <span class="flag">Latest notice</span>}
-  <p class="kicker"><span>{issueNo(issue)}</span><time datetime={date.toISOString()}>{fmtDate(date)}</time></p>
+  {featured && <span class="flag">Latest dispatch</span>}
+  <p class="kicker"><span>Dispatch {String(issue).padStart(3, "0")}</span><time datetime={date.toISOString()}>{fmtDate(date)}</time></p>
   <h2>{title}</h2>
   {dek && <p class="dek">{dek}</p>}
   {stamp && <span class="stamp">{stamp}</span>}

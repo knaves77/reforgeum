@@ -8,8 +8,9 @@ export const PAPER_STYLES = ['newsprint', 'xerox', 'index', 'carbon', 'poster', 
 const optional = <T extends z.ZodTypeAny>(type: T) =>
   z.preprocess((v) => (v === '' || v === null ? undefined : v), type.optional());
 
-const posts = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/posts' }),
+// Dispatches: long essays and ramblings, each a pinned pamphlet.
+const dispatches = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/dispatches' }),
   schema: z.object({
     title: z.string(),
     date: z.coerce.date(),
@@ -17,6 +18,17 @@ const posts = defineCollection({
     style: optional(z.enum(PAPER_STYLES)),
     stamp: optional(z.string()),
     cover: optional(z.string()),
+    tags: z.preprocess((v) => (Array.isArray(v) ? v.filter(Boolean) : []), z.array(z.string())),
+    draft: z.preprocess((v) => v === true, z.boolean()),
+  }),
+});
+
+// Scraps: short notes, read right on the board.
+const scraps = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/scraps' }),
+  schema: z.object({
+    title: optional(z.string()),
+    date: z.coerce.date(),
     tags: z.preprocess((v) => (Array.isArray(v) ? v.filter(Boolean) : []), z.array(z.string())),
     draft: z.preprocess((v) => v === true, z.boolean()),
   }),
@@ -30,4 +42,4 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { posts, pages };
+export const collections = { dispatches, scraps, pages };

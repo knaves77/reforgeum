@@ -41,6 +41,8 @@ const ogImage = new URL(image, Astro.site);
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="alternate" type="application/rss+xml" title={site.title} href="/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${site.title}: Dispatches`} href="/dispatches/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${site.title}: Scraps`} href="/scraps/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta property="og:site_name" content={site.title} />
     <meta property="og:title" content={title ?? site.title} />

@@ -8,7 +8,7 @@ import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import sharp from 'sharp';
 import site from '../data/site.json';
-import { paperFor, issueNo, fmtDate, type Post } from './board';
+import { paperFor, scrapFor, issueNo, fmtDate, plainText, type Dispatch, type Scrap } from './board';
 
 const W = 1200;
 const H = 630;
@@ -131,7 +131,7 @@ const CHAR_W: Record<string, number> = {
   'Special Elite': 0.64,
   'Courier Prime': 0.6,
   Newsreader: 0.46,
-  Caveat: 0.4,
+  Caveat: 0.36,
 };
 
 const countLines = (text: string, perLine: number) => {
@@ -260,7 +260,7 @@ const pinHead = (color: string) =>
 /* ─── Cards ─── */
 
 // Just the notice, on a transparent canvas; it's composited between the backdrop and the top layer.
-function postCard(post: Post, issue: number): El {
+function postCard(post: Dispatch, issue: number): El {
   const { title, date, dek, stamp } = post.data;
   const meta = paperFor(post);
   const paper = PAPERS[meta.style] ?? PAPERS.newsprint;
@@ -303,7 +303,7 @@ function postCard(post: Post, issue: number): El {
           marginBottom: 18,
           borderBottom: meta.style === 'newsprint' ? `4px solid ${paper.ink}` : '0px solid transparent',
         },
-        h('div', {}, `${site.title} · ${issueNo(issue)}`),
+        h('div', {}, `${site.title} · Dispatch ${issueNo(issue)}`),
         h('div', {}, fmtDate(date)),
       ),
       h(
@@ -354,6 +354,92 @@ function postCard(post: Post, issue: number): El {
           stamp,
         ),
       pinHead(meta.pin),
+    ),
+  );
+}
+
+const SCRAP_STOCKS: Record<string, { bg: string; lines?: boolean }> = {
+  yellow: { bg: '#e9cd55' },
+  pink: { bg: '#eaa1ae' },
+  blue: { bg: '#9fc4d6' },
+  index: { bg: '#f8f3e4', lines: true },
+};
+
+// A scrap: a big handwritten note, taped or pinned to the board.
+function scrapCard(post: Scrap, issue: number): El {
+  const { title, date } = post.data;
+  const look = scrapFor(post);
+  const stock = SCRAP_STOCKS[look.stock] ?? SCRAP_STOCKS.yellow;
+  const text = clip(plainText(post.body), title ? 180 : 230);
+  const PW = 700;
+  const PH = 440;
+  const inner = PW - 104;
+  const titleH = title ? 62 : 0;
+  // Largest handwriting that fits; index cards keep to their 52px rules.
+  let size = 34;
+  for (let s = 66; s >= 34; s -= 2) {
+    const lh = stock.lines ? 52 : s * 1.18;
+    if (countLines(text, Math.floor(inner / (s * CHAR_W.Caveat))) * lh + titleH + 50 <= PH - 84) {
+      size = s;
+      break;
+    }
+  }
+  const lineHeight = stock.lines ? 52 / size : 1.18;
+
+  return h(
+    'div',
+    { width: W, height: H, display: 'flex', position: 'relative', overflow: 'hidden' },
+    h(
+      'div',
+      {
+        position: 'absolute',
+        left: 92,
+        top: 132,
+        width: inner,
+        height: PH - 84,
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '44px 52px 40px',
+        backgroundColor: stock.bg,
+        color: '#1c1a17',
+        transform: `rotate(${(look.tilt / 1.8).toFixed(2)}deg)`,
+      },
+      stock.lines && img(ruledLines(PW, PH, 94), { position: 'absolute', left: 0, top: 0, width: PW, height: PH }),
+      h(
+        'div',
+        {
+          display: 'flex',
+          justifyContent: 'space-between',
+          fontFamily: 'Courier Prime',
+          fontSize: 19,
+          letterSpacing: 2,
+          textTransform: 'uppercase',
+          color: 'rgba(28,26,23,0.7)',
+          paddingBottom: 10,
+          marginBottom: stock.lines ? 0 : 14,
+        },
+        h('div', {}, `${site.title} · Scrap ${issueNo(issue)}`),
+        h('div', {}, fmtDate(date)),
+      ),
+      title &&
+        h(
+          'div',
+          { fontFamily: 'Caveat', fontWeight: 700, fontSize: 50, lineHeight: stock.lines ? 52 / 50 : 1.1, marginBottom: stock.lines ? 0 : 10 },
+          title,
+        ),
+      h('div', { fontFamily: 'Caveat', fontWeight: 700, fontSize: size, lineHeight }, text),
+      look.taped
+        ? h('div', {
+            position: 'absolute',
+            top: -20,
+            left: '50%',
+            marginLeft: -80,
+            width: 160,
+            height: 42,
+            backgroundColor: 'rgba(244,234,200,0.72)',
+            transform: 'rotate(-3deg)',
+          })
+        : pinHead(look.pin),
     ),
   );
 }
@@ -424,7 +510,7 @@ function siteCard(): El {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingTop: 50,
+        paddingTop: 20,
       },
       h(
         'div',
@@ -459,11 +545,12 @@ function siteCard(): El {
       h(
         'div',
         {
-          marginTop: 28,
-          maxWidth: 760,
+          marginTop: 24,
+          maxWidth: 820,
+          textWrap: 'balance',
           fontFamily: 'Newsreader',
           fontStyle: 'italic',
-          fontSize: 32,
+          fontSize: 27,
           lineHeight: 1.35,
           color: '#f2dcb8',
           textAlign: 'center',
@@ -476,7 +563,7 @@ function siteCard(): El {
       {
         position: 'absolute',
         left: 0,
-        bottom: 46,
+        bottom: 34,
         width: W,
         display: 'flex',
         justifyContent: 'center',
@@ -536,25 +623,33 @@ async function shadow(notice: Buffer, { dx, dy, blur, opacity }: { dx: number; d
     .toBuffer();
 }
 
-export const renderPostCard = (post: Post, issue: number) =>
-  render({ id: post.id, data: post.data, issue, paper: paperFor(post) }, async () => {
-    const [base, top] = await sharedLayers();
-    const notice = Buffer.from(await draw(postCard(post, issue)));
-    const [wide, tight] = await Promise.all([
-      shadow(notice, { dx: 6, dy: 30, blur: 22, opacity: 0.8 }),
-      shadow(notice, { dx: 2, dy: 3, blur: 2.5, opacity: 0.45 }),
-    ]);
-    return sharp(base)
-      .composite([
-        { input: wide },
-        { input: tight },
-        { input: notice },
-        { input: filmGrain(), tile: true },
-        { input: Buffer.from(top) },
-      ])
-      .png()
-      .toBuffer();
-  });
+// Lay a notice over the shared backdrop, with its shadows, film grain and the lamp on top.
+async function onBoard(notice: El) {
+  const [base, top] = await sharedLayers();
+  const png = Buffer.from(await draw(notice));
+  const [wide, tight] = await Promise.all([
+    shadow(png, { dx: 6, dy: 30, blur: 22, opacity: 0.8 }),
+    shadow(png, { dx: 2, dy: 3, blur: 2.5, opacity: 0.45 }),
+  ]);
+  return sharp(base)
+    .composite([
+      { input: wide },
+      { input: tight },
+      { input: png },
+      { input: filmGrain(), tile: true },
+      { input: Buffer.from(top) },
+    ])
+    .png()
+    .toBuffer();
+}
+
+export const renderDispatchCard = (post: Dispatch, issue: number) =>
+  render({ kind: 'dispatch', id: post.id, data: post.data, issue, paper: paperFor(post) }, () => onBoard(postCard(post, issue)));
+
+export const renderScrapCard = (post: Scrap, issue: number) =>
+  render({ kind: 'scrap', id: post.id, data: post.data, body: post.body, issue, look: scrapFor(post) }, () =>
+    onBoard(scrapCard(post, issue)),
+  );
 
 export const renderSiteCard = () => render('site', async () => Buffer.from(await draw(siteCard())));
 
