@@ -185,7 +185,7 @@ p, li { text-wrap: pretty; }
 
 .masthead-kicker {
   margin: 0 0 14px;
-  font-family: var(--f-type);
+  font-family: var(--f-mono);
   font-size: clamp(0.72rem, 0.66rem + 0.25vw, 0.85rem);
   letter-spacing: 0.24em;
   text-transform: uppercase;
@@ -719,7 +719,7 @@ p, li { text-wrap: pretty; }
   line-height: 0.96;
 }
 .paper-poster.pamphlet h2 { font-size: calc(var(--t-card) * 1.18); }
-.paper-poster .dek { font-weight: 600; }
+.paper-poster .dek { font-style: italic; }
 .paper-poster .stamp { color: var(--ink); }
 
 /* Kraft: brown paper, stencilled */

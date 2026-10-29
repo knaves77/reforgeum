@@ -16,6 +16,7 @@ Search only works on the built site: run `npm run build && npm run preview`.
 - `/` shows the 12 latest notices, `/archive/` lists every notice with full-text search (Pagefind), and `/about/` is the About page. `/rss.xml` is a full-content feed of the latest 50.
 - `npm run build` builds the site with Astro, then `scripts/optimize-dist.mjs` shrinks uploaded images to 1600px and adds their sizes, then Pagefind builds the search index.
 - Every post gets its own social card at `/og/<post>.jpg`: its notice pinned to the lamplit board, in its own paper style. The site has a card too, at `/og/site.jpg`. The cards are drawn at build time in `src/lib/og.ts` and cached in `node_modules/.cache/og`, so only new or edited posts get redrawn.
+- Fonts are self-hosted from `src/assets/fonts`. Each one is split into a small "core" file and an "extra" file for accented characters, which the browser only fetches when a page needs it. After changing a font package, rerun `node scripts/subset-fonts.mjs`.
 - `public/_headers` sets the cache rules on Cloudflare Pages and Netlify.
 - `extras/themes/` holds the Wheatpaste and Red String looks. They aren't used, but they're kept in case he wants them back.
 
